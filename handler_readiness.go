@@ -7,7 +7,3 @@ func handlerReadiness(w http.ResponseWriter, r *http.Request) {
 
 	responseWithJSON(w, 200, struct{}{}) // now hook this up handler with a router
 }
-
-func handlerErr(w http.ResponseWriter, r *http.Request) {
-	responseWithError(w, 400, "something went wrong")
-}
