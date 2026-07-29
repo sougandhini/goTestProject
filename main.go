@@ -16,10 +16,10 @@ func main() {
 	godotenv.Load(".env")
 	portString := os.Getenv("PORT")
 	if portString == "" {
-		log.Fatal("Port is not found in .env") // this is cut the program and returns
+		log.Fatal("Port is not found in .env") // this is cut the program with exit status 1 and returns
 	}
 
-	router := chi.NewRouter()
+	router := chi.NewRouter() // Mother router
 
 	// this router.Use is wrt what request should be given response to
 	router.Use(cors.Handler(cors.Options{
@@ -30,12 +30,12 @@ func main() {
 		AllowCredentials: false,
 		MaxAge:           300,
 	}))
+	
 	v1Router := chi.NewRouter()
 	// v1Router.HandleFunc("/healthz", handlerReadiness) // this handleFunc allows all type of api requests post, put, delete everything same... but we want healthz to only be accessed to GET so change it to next line....
-	v1Router.Get("/healthz", handlerReadiness)
+	v1Router.Get("/healthz", handlerReadiness) // scopes the handler to only fire on GET requests
 	v1Router.Get("/error", handlerErr)
-
-	router.Mount("/v1", v1Router) // nesting v1 router for /v1 path and then see /healthz
+	router.Mount("/v1", v1Router) // nesting v1 router for /v1 path and then see /healthz - first child router to mother router
 
 	srv := &http.Server{
 		Handler: router,
@@ -46,5 +46,5 @@ func main() {
 	err := srv.ListenAndServe() // this line will run forever
 	if err != nil {
 		log.Fatal(err)
-	} // this means if anything goes wrong while handing the http request in the mentioned port we will log and return the program
+	} // this means if anything goes wrong while handling the http request in the mentioned port we will log and return the program
 }

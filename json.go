@@ -12,7 +12,7 @@ func responseWithError(w http.ResponseWriter, statusCode int, msg string) {
 		log.Println("responding with 5xx errors: ", msg)
 	}
 	type errResponse struct {
-		Error string `json:"error"` // this line says hey for this var Error you use the json ley called error
+		Error string `json:"error"` // this line says hey for this var Error you use the json format called error
 	}
 	responseWithJSON(w, statusCode, errResponse{
 		Error: msg,
@@ -27,7 +27,7 @@ func responseWithJSON(w http.ResponseWriter, statusCode int, payload interface{}
 		w.WriteHeader(500)
 		return
 	}
-	w.Header().Add("Content-Type", "application/json")
+	w.Header().Add("Content-Type", "application/json") //this is a key-value pair 
 	w.WriteHeader(statusCode)
 	w.Write(data)
 

@@ -1,0 +1,21 @@
+## Im using CORS method to secure API
+
+# Begin with: 
+1. do go mod init github.com/username/package_name
+2. do git init (this initialises git in the current repo) 
+3. create .gitignore files
+4. Load the environment variables, pull env from file through joho
+5. run go mod vendor
+
+# Spin up server
+1. create a NewRouter and connect it to a server, initialise a handler for server
+2. Server should listen and serve
+3. request the localhost through a GET request - the output should be 404 (when srver is running)
+4. Add CORS specs to server
+5. create a .json file to help in sending json response back
+6. create a handler to handle request, as our response pattern is ready
+7. Now hook up http-handler to a specific http-method and path (router2.Get("/healthz")) using a new Chi-router2
+8. Mount this new router2 to the first router1, this mount function says hey im creating router2 to be a child router to router1
+9. congifure helper function to respond with error
+
+Note: so once you create a helper-function for repsonse, you should also create a handler function to handle that error
