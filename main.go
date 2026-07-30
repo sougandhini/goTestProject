@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"log"
 	"net/http"
 	"os"
@@ -8,9 +9,16 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
+	"github.com/sougandhini/rssagg/internal/database"
+
+	_ "github.com/lib/pq"
 )
 
-// NOte: we are building this rss aggregator on chi server- a lightweight server
+// Note: we are building this rss aggregator on chi server- a lightweight server
+type apiConfig struct {
+	DB *database.Queries //saying that this is a pointer to another structure called queires thats present in database folder
+}
+
 func main() {
 
 	godotenv.Load(".env")
@@ -19,6 +27,20 @@ func main() {
 		log.Fatal("Port is not found in .env") // this is cut the program with exit status 1 and returns
 	}
 
+	dbUrl := os.Getenv("DB_URL")
+	if dbUrl == "" {
+		log.Fatal("DB_URL is not found in .env") //
+	}
+
+	conn, err := sql.Open("postgres", dbUrl)
+	if err != nil {
+		log.Fatal("Unable to connect to Database")
+	}
+
+	// this is my link to connect to DB through go
+	apiCfg := apiConfig{
+		DB: database.New(conn), // this takes type: *database.Queries but what we have is conn which is *sql.DB type, so we need to typecast it
+	}
 	router := chi.NewRouter() // Mother router
 
 	// this router.Use is wrt what request should be given response to
@@ -30,11 +52,12 @@ func main() {
 		AllowCredentials: false,
 		MaxAge:           300,
 	}))
-	
+
 	v1Router := chi.NewRouter()
 	// v1Router.HandleFunc("/healthz", handlerReadiness) // this handleFunc allows all type of api requests post, put, delete everything same... but we want healthz to only be accessed to GET so change it to next line....
 	v1Router.Get("/healthz", handlerReadiness) // scopes the handler to only fire on GET requests
 	v1Router.Get("/error", handlerErr)
+	v1Router.Post("/users",apiCfg.handlerCreateUser) // now this handler will have access to DB 
 	router.Mount("/v1", v1Router) // nesting v1 router for /v1 path and then see /healthz - first child router to mother router
 
 	srv := &http.Server{
@@ -43,8 +66,8 @@ func main() {
 	}
 
 	log.Printf("server starting on port %v", portString)
-	err := srv.ListenAndServe() // this line will run forever
-	if err != nil {
-		log.Fatal(err)
+	errListenNServe := srv.ListenAndServe() // this line will run forever
+	if errListenNServe != nil {
+		log.Fatal(errListenNServe)
 	} // this means if anything goes wrong while handling the http request in the mentioned port we will log and return the program
 }
