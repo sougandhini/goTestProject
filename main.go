@@ -57,7 +57,13 @@ func main() {
 	// v1Router.HandleFunc("/healthz", handlerReadiness) // this handleFunc allows all type of api requests post, put, delete everything same... but we want healthz to only be accessed to GET so change it to next line....
 	v1Router.Get("/healthz", handlerReadiness) // scopes the handler to only fire on GET requests
 	v1Router.Get("/error", handlerErr)
-	v1Router.Post("/users",apiCfg.handlerCreateUser) // now this handler will have access to DB 
+
+	//CRUD
+	//Create
+	v1Router.Post("/users", apiCfg.handlerCreateUser) // now this handler will have access to DB
+
+	//Get
+	v1Router.Get("/users", apiCfg.handlerGetUser)
 	router.Mount("/v1", v1Router) // nesting v1 router for /v1 path and then see /healthz - first child router to mother router
 
 	srv := &http.Server{
