@@ -58,12 +58,26 @@ func main() {
 	v1Router.Get("/healthz", handlerReadiness) // scopes the handler to only fire on GET requests
 	v1Router.Get("/error", handlerErr)
 
-	//CRUD
+	//CRUD for users
 	//Create
 	v1Router.Post("/users", apiCfg.handlerCreateUser) // now this handler will have access to DB
 
 	//Get
-	v1Router.Get("/users", apiCfg.handlerGetUser)
+	v1Router.Get("/users", apiCfg.middlewareAuth(apiCfg.handlerGetUser)) // we're using auth middleware only for those functions which requires authentication
+
+	// Feed handlers
+
+	//Create feed
+	v1Router.Post("/feeds", apiCfg.middlewareAuth(apiCfg.handlerCreateFeed))
+
+	//Get Feed
+	v1Router.Get("/feeds", apiCfg.handlerGetFeeds)
+
+	//Create a feed follow
+	v1Router.Post("/feed_follows", apiCfg.middlewareAuth(apiCfg.handlerCreateFeedFollow))
+
+	// List all the feeds the the user is currently following
+	v1Router.Get("/feed_follows", apiCfg.middlewareAuth(apiCfg.handlerGetFeedFollows))
 	router.Mount("/v1", v1Router) // nesting v1 router for /v1 path and then see /healthz - first child router to mother router
 
 	srv := &http.Server{
