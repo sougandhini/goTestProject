@@ -1,0 +1,8 @@
+version: "2"
+sql:
+  - schema: "sql/schema" #where you can find schema
+    queries: "sql/queries" #where you can find queries
+    engine: "postgresql" # which query engine you use
+    gen:
+      go:
+        out: "internal/database" #this means hey "gen"erate "go" code in the "out" path 
