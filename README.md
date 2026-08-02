@@ -19,7 +19,7 @@ Implementing the server side specs of go
 6. create a handler to handle request, as our response pattern is ready
 7. Now hook up http-handler to a specific http-method and path (router2.Get("/healthz")) using a new Chi-router2
 8. Mount this new router2 to the first router1, this mount function says hey im creating router2 to be a child router to router1
-9. congifure helper function to respond with error
+9. configure helper function to respond with error
 
 Note: so once you create a helper-function for repsonse, you should also create a handler function to handle that error
 
@@ -68,20 +68,20 @@ Note: while running a migration always note to run it in sql/schema with goose p
 
 ### Creating feed (POST)
 1. create a new feed by adding a query in feeds.sql 
-2. to write handler_query, we need to repeat the same line of auth code for api_key auth, so we're creating a moddleware auth that handles this code of api_key usage in handler function 
+2. to write handler_query, we need to repeat the same line of auth code for api_key auth, so we're creating a middleware auth that handles this code of api_key usage in handler function 
 Note: interal/auth/auth.go only contains info regarding how to strip header and give back a valid API-key
 3. Follow same steps as we did in create user, and get user to create feed and get feed
 Note: everytime you changed anything in the migration table, then need to run down migration first and then up the migration, if you run the up migration again, it wont show any changes
 4. from create feed, we are trying to create the feed for a user (using api key of the user) by specifying the name of the feed and url of the feed
 
-Note: the RSS feed is a strcutured xml doc that describes what each post on the blog says, may be either a link/ short-description
+Note: the RSS feed is a structured xml doc that describes what each post on the blog says, may be either a link/ short-description
 
 ### Get all the feeds (GET)
 1. this is not an authenticated endpoint, so the reponse is about all the rss feeds present. 
 2. Add query, and add method
 
 ## Follow specific feeds (POST)
-1. create a schema to follow specific feeds (this is a n:n relationship model) storing the relationship between a user and all the feeds that they follow 
+1. create a schema to follow specific feeds (this is a n:n relationship model, meaning a user can follow n feeds and a same feed can be followed by m users) storing the relationship between a user and all the feeds that they follow 
 2. To follow a feed we need to create a record of a user following the feed - so an authenticated endpoint
 
 So steps:
@@ -93,3 +93,21 @@ d. create end-point to access the request
 Note: Mistakes done till now - the designing of API should be consisent, if you're using snake-case continue with snake-case, i used camelCase instead of snake case
 
 ## Unfollow a feed
+1. This is our first query that is not retuning anything so in query we just specify it to execute
+2. we are using id and user_id both in order to delete a feed coz, if by somehow a user gets id of another's user's feed he could delete it, without the other user's consent, so to avoid it we are using both user_id and id
+
+
+# Overall:
+we are mirrored the functioning of RSS feed server by configuring API's
+1. For user - Create and Get (authenticated method)
+POST  - /users with name in body.  Please copy the api_key in the response
+GET  - /users, pass Authentication header with value ApiKey "value that you've copied" (note: wihtout double quotes LOL) then in response you'll get that user
+
+2. For feed (with user_id as foreign key) - Create (authenticated method) and Get all feeds
+POST  - /feeds with name and url as the body params, and pass ApiKey as auth header
+GET - /feeds , no need to pass any auth, just get is sufficient
+
+3. For feed_follow - Follow a feed (authenticated), List - all the feeds that a user follows (so authenticated) and unfollow
+POST - /feed_follows , pass Auth header with ApiKey and in body pass "feed_id" to create a feed
+GET - /feed_follows, pass Auth header 
+DELETE - /feed_follows/{feedFollowID} - pass Auth header and nothing is required in body

@@ -16,7 +16,7 @@ import (
 
 // Note: we are building this rss aggregator on chi server- a lightweight server
 type apiConfig struct {
-	DB *database.Queries //saying that this is a pointer to another structure called queires thats present in database folder
+	DB *database.Queries //saying that this is a pointer to another structure called queries thats present in database folder
 }
 
 func main() {
@@ -41,6 +41,7 @@ func main() {
 	apiCfg := apiConfig{
 		DB: database.New(conn), // this takes type: *database.Queries but what we have is conn which is *sql.DB type, so we need to typecast it
 	}
+
 	router := chi.NewRouter() // Mother router
 
 	// this router.Use is wrt what request should be given response to
@@ -58,26 +59,30 @@ func main() {
 	v1Router.Get("/healthz", handlerReadiness) // scopes the handler to only fire on GET requests
 	v1Router.Get("/error", handlerErr)
 
-	//CRUD for users
-	//Create
+	// CRUD for users
+	// 1. Create
 	v1Router.Post("/users", apiCfg.handlerCreateUser) // now this handler will have access to DB
 
-	//Get
+	// 2. Get
 	v1Router.Get("/users", apiCfg.middlewareAuth(apiCfg.handlerGetUser)) // we're using auth middleware only for those functions which requires authentication
 
 	// Feed handlers
-
-	//Create feed
+	// 1. Create feed
 	v1Router.Post("/feeds", apiCfg.middlewareAuth(apiCfg.handlerCreateFeed))
 
-	//Get Feed
+	// 2. Get Feed
 	v1Router.Get("/feeds", apiCfg.handlerGetFeeds)
 
-	//Create a feed follow
+	// Feed follow
+	// 1. Create a feed follow
 	v1Router.Post("/feed_follows", apiCfg.middlewareAuth(apiCfg.handlerCreateFeedFollow))
 
-	// List all the feeds the the user is currently following
+	// 2. List all the feeds the the user is currently following
 	v1Router.Get("/feed_follows", apiCfg.middlewareAuth(apiCfg.handlerGetFeedFollows))
+
+	// 3. Delete feed follow
+	v1Router.Delete("/feed_follows/{feedFollowID}", apiCfg.middlewareAuth(apiCfg.handlerDeleteFeedFollow))
+
 	router.Mount("/v1", v1Router) // nesting v1 router for /v1 path and then see /healthz - first child router to mother router
 
 	srv := &http.Server{

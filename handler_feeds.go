@@ -11,7 +11,6 @@ import (
 )
 
 func (apiCfg *apiConfig) handlerCreateFeed(w http.ResponseWriter, r *http.Request, user database.User) {
-	// this is a standard function signature and this should never change but we still want out link to be passed here, so lets make it an api method then
 	type parameters struct {
 		Name string `json:"name"`
 		URL  string `json:"url"`
@@ -19,12 +18,13 @@ func (apiCfg *apiConfig) handlerCreateFeed(w http.ResponseWriter, r *http.Reques
 	decoder := json.NewDecoder(r.Body)
 	params := parameters{}
 	err := decoder.Decode(&params)
-	if (params.Name == "" || params.Name == " ") || (params.URL == "" || params.URL == " ") {
-		responseWithError(w, 403, "name/url field cannot be empty")
-		return
-	}
 	if err != nil {
 		responseWithError(w, 400, fmt.Sprintf("Error parsing request-JSON: %v", err))
+		return
+	}
+
+	if (params.Name == "" || params.Name == " ") || (params.URL == "" || params.URL == " ") {
+		responseWithError(w, 403, "name/url field cannot be empty")
 		return
 	}
 
@@ -45,7 +45,6 @@ func (apiCfg *apiConfig) handlerCreateFeed(w http.ResponseWriter, r *http.Reques
 }
 
 func (apiCfg *apiConfig) handlerGetFeeds(w http.ResponseWriter, r *http.Request) {
-	// this is a standard function signature and this should never change but we still want out link to be passed here, so lets make it an api method then
 
 	feed, err := apiCfg.DB.GetFeeds(r.Context())
 	if err != nil {

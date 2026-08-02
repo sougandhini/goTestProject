@@ -18,12 +18,13 @@ func (apiCfg *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Reques
 	decoder := json.NewDecoder(r.Body)
 	params := parameters{}
 	err := decoder.Decode(&params)
-	if params.Name == "" || params.Name == " " {
-		responseWithError(w, 403, "Name field cannot be empty")
-		return
-	}
 	if err != nil {
 		responseWithError(w, 400, fmt.Sprintf("Error parsing request-JSON: %v", err))
+		return
+	}
+	
+	if params.Name == "" || params.Name == " " {
+		responseWithError(w, 403, "Name field cannot be empty")
 		return
 	}
 
