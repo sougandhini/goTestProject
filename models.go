@@ -79,3 +79,40 @@ func databaseFeedFollowsToFeedFollows(dbFeedFollows []database.FeedFollow) []Fee
 	}
 	return feedFollows
 }
+
+// Note: here we're changing strings.NullString type of Description to *string coz null-string type gives the value in json like a nested block which is bad for user-experience, so if we convert it into a *string then its marshalled to json is it only has some value or else that key will not be present in the response
+type Post struct {
+	ID          uuid.UUID `json:"id"`
+	CreatedAt   time.Time `json:"creted_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	Title       string    `json:"title"`
+	Description *string   `json:"description"`
+	PublishedAt time.Time `json:"published_at"`
+	Url         string    `json:"url"`
+	FeedID      uuid.UUID `json:"feed_id"`
+}
+
+func databasePostToPost(dbPost database.Post) Post {
+	var description *string
+	if dbPost.Description.Valid {
+		description = &dbPost.Description.String
+	}
+	return Post{
+		ID:          dbPost.ID,
+		CreatedAt:   dbPost.CreatedAt,
+		UpdatedAt:   dbPost.UpdatedAt,
+		Title:       dbPost.Title,
+		Description: description,
+		PublishedAt: dbPost.PublishedAt,
+		Url:         dbPost.Url,
+		FeedID:      dbPost.FeedID,
+	}
+}
+
+func databasePostsToPosts(dbPosts []database.Post) []Post {
+	posts := []Post{}
+	for _, dbpost := range dbPosts {
+		posts = append(posts, databasePostToPost(dbpost))
+	}
+	return posts
+}

@@ -37,7 +37,7 @@ func urlToFeed(url string) (RSSFeed, error) {
 	}
 	defer resp.Body.Close()
 
-	dat, err := io.ReadAll(resp.Body)
+	dat, err := io.ReadAll(resp.Body) // This reads everything from resp.Body
 	if err != nil {
 		return RSSFeed{}, err
 	}

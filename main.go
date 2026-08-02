@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
@@ -37,10 +38,14 @@ func main() {
 		log.Fatal("Unable to connect to Database")
 	}
 
+	db := database.New(conn) // this connection is for scraping
+
 	// this is my link to connect to DB through go
 	apiCfg := apiConfig{
 		DB: database.New(conn), // this takes type: *database.Queries but what we have is conn which is *sql.DB type, so we need to typecast it
 	}
+
+	go startScraping(db, 10, time.Minute) //we're never going to return anything in this function (we have infinite for loop here) therefore please write it in a separate thread so that it wont interrupt my current main.go thread
 
 	router := chi.NewRouter() // Mother router
 
@@ -82,6 +87,9 @@ func main() {
 
 	// 3. Delete feed follow
 	v1Router.Delete("/feed_follows/{feedFollowID}", apiCfg.middlewareAuth(apiCfg.handlerDeleteFeedFollow))
+
+	// Get New Posts of a feed to a subscribed user
+	v1Router.Get("/posts", apiCfg.middlewareAuth(apiCfg.handlerGetPostsForUser))
 
 	router.Mount("/v1", v1Router) // nesting v1 router for /v1 path and then see /healthz - first child router to mother router
 

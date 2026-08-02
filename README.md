@@ -1,4 +1,4 @@
-# goTestProject
+# RSS-Feed data blog-aggregator
 Implementing the server side specs of go
 
 ## Im using CORS method to secure API
@@ -96,6 +96,39 @@ Note: Mistakes done till now - the designing of API should be consisent, if you'
 1. This is our first query that is not retuning anything so in query we just specify it to execute
 2. we are using id and user_id both in order to delete a feed coz, if by somehow a user gets id of another's user's feed he could delete it, without the other user's consent, so to avoid it we are using both user_id and id
 
+## RSS Feed fetching
+1. this part goes out and fetches new posts, by going out periodically. 
+e.g. if there is a feed called myBlog this part goes out and see if there are any new blog posts, if so it fetches and displays
+2. so we need a new column called last_fecthed_at in feeds table 
+I made a hilarious mistake here, i named the coulmn last_updated_at and added it, but it was already present, the migration was successful... but later when i tried to run the query through sqlc generate it throwed error column not found... later i realised it that it was coz of the name that i've given to the column LOL
+3. now, write the query to fetch the feeds based on priority : 
+a. which were not fetched previously
+b. those feeds which were fetched at earliest i.e. the farthest in the past (based on timestamp)
+4. a second query to mark the feed as fetched -to say hey we've already fetched this feed
+5. Create a function that takes RSS url and parse (return) it as actual body - in rss.go
+the return item is of type RSS, and each RSS feed also has list of items and each item corresponds to new blog posts
+
+Note: whenever we're trying to define a struct to unmarshall a json/xml then please use its correpsonding xml/json tag next to each field
+6. Writing the scraper file - this function is running in background as our server
+Note: In software terms a scraper is a software that fetches updates periodically.
+This function takes concurrency and timeBetweenRequests as arguments, so the request is sent periodically to fetch n number of concurrent feeds
+7. as we need to fetch the concurrent feeds returned individually at the same time we need have a sync mechanism, so we use to sync.waitgroup to wait until all the individual feeds are fetched and retuned back by all the go-routines
+
+8. LOL it was fantastic to know its working!!!
+yeah as soon as i start running the server the blog posts are being successfully bought in
+
+## Saving blog posts into database
+1. creating a new table in DB called posts, add a new query to create post
+2. then add this inside scrapper, run it
+Hurray!! you successfully added all the feeds to DB, but there exists a problem now..
+we've added unique constraint, so as we run this again, we'll get a lot of errors coz unique constraint failed... but this is expected behaviour, so lets not log it
+
+## LAST FEATURE...
+user to be able to get a list of all the newst posts from feeds that they're following
+1. This involves join query
+2. this is an authenticated end point
+
+
 
 # Overall:
 we are mirrored the functioning of RSS feed server by configuring API's
@@ -111,3 +144,8 @@ GET - /feeds , no need to pass any auth, just get is sufficient
 POST - /feed_follows , pass Auth header with ApiKey and in body pass "feed_id" to create a feed
 GET - /feed_follows, pass Auth header 
 DELETE - /feed_follows/{feedFollowID} - pass Auth header and nothing is required in body
+
+## WayForward
+1. Improve logging mechanism
+2. Add a frontend/CLI to interact with API
+3. this was just happy coding... so dont mind to go deep and rouge XD 

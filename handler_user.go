@@ -22,7 +22,7 @@ func (apiCfg *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Reques
 		responseWithError(w, 400, fmt.Sprintf("Error parsing request-JSON: %v", err))
 		return
 	}
-	
+
 	if params.Name == "" || params.Name == " " {
 		responseWithError(w, 403, "Name field cannot be empty")
 		return
@@ -59,4 +59,16 @@ func (apiCfg *apiConfig) handlerGetUser(w http.ResponseWriter, r *http.Request, 
 	//Note: we're replacing this in middleware, coz its required by multiple functions
 
 	responseWithJSON(w, 200, databaseUserToResponseUser(user))
+}
+
+func (apiCfg *apiConfig) handlerGetPostsForUser(w http.ResponseWriter, r *http.Request, user database.User) {
+	posts, err := apiCfg.DB.GetPostsForUser(r.Context(), database.GetPostsForUserParams{
+		UserID: user.ID,
+		Limit:  10,
+	})
+	if err != nil {
+		responseWithError(w, 400, fmt.Sprintf("couldnot get posts : %v", err))
+	}
+
+	responseWithJSON(w, 200, databasePostsToPosts(posts))
 }
