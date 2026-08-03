@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
@@ -16,7 +17,7 @@ import (
 
 // Note: we are building this rss aggregator on chi server- a lightweight server
 type apiConfig struct {
-	DB *database.Queries //saying that this is a pointer to another structure called queires thats present in database folder
+	DB *database.Queries //saying that this is a pointer to another structure called queries thats present in database folder
 }
 
 func main() {
@@ -37,10 +38,15 @@ func main() {
 		log.Fatal("Unable to connect to Database")
 	}
 
+	db := database.New(conn) // this connection is for scraping
+
 	// this is my link to connect to DB through go
 	apiCfg := apiConfig{
 		DB: database.New(conn), // this takes type: *database.Queries but what we have is conn which is *sql.DB type, so we need to typecast it
 	}
+
+	go startScraping(db, 10, time.Minute) //we're never going to return anything in this function (we have infinite for loop here) therefore please write it in a separate thread so that it wont interrupt my current main.go thread
+
 	router := chi.NewRouter() // Mother router
 
 	// this router.Use is wrt what request should be given response to
@@ -58,12 +64,33 @@ func main() {
 	v1Router.Get("/healthz", handlerReadiness) // scopes the handler to only fire on GET requests
 	v1Router.Get("/error", handlerErr)
 
-	//CRUD
-	//Create
+	// CRUD for users
+	// 1. Create
 	v1Router.Post("/users", apiCfg.handlerCreateUser) // now this handler will have access to DB
 
-	//Get
-	v1Router.Get("/users", apiCfg.handlerGetUser)
+	// 2. Get
+	v1Router.Get("/users", apiCfg.middlewareAuth(apiCfg.handlerGetUser)) // we're using auth middleware only for those functions which requires authentication
+
+	// Feed handlers
+	// 1. Create feed
+	v1Router.Post("/feeds", apiCfg.middlewareAuth(apiCfg.handlerCreateFeed))
+
+	// 2. Get Feed
+	v1Router.Get("/feeds", apiCfg.handlerGetFeeds)
+
+	// Feed follow
+	// 1. Create a feed follow
+	v1Router.Post("/feed_follows", apiCfg.middlewareAuth(apiCfg.handlerCreateFeedFollow))
+
+	// 2. List all the feeds the the user is currently following
+	v1Router.Get("/feed_follows", apiCfg.middlewareAuth(apiCfg.handlerGetFeedFollows))
+
+	// 3. Delete feed follow
+	v1Router.Delete("/feed_follows/{feedFollowID}", apiCfg.middlewareAuth(apiCfg.handlerDeleteFeedFollow))
+
+	// Get New Posts of a feed to a subscribed user
+	v1Router.Get("/posts", apiCfg.middlewareAuth(apiCfg.handlerGetPostsForUser))
+
 	router.Mount("/v1", v1Router) // nesting v1 router for /v1 path and then see /healthz - first child router to mother router
 
 	srv := &http.Server{

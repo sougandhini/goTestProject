@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/sougandhini/rssagg/internal/auth"
 	"github.com/sougandhini/rssagg/internal/database"
 )
 
@@ -19,12 +18,13 @@ func (apiCfg *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Reques
 	decoder := json.NewDecoder(r.Body)
 	params := parameters{}
 	err := decoder.Decode(&params)
-	if params.Name == "" || params.Name == " " {
-		responseWithError(w, 403, "Name field cannot be empty")
-		return
-	}
 	if err != nil {
 		responseWithError(w, 400, fmt.Sprintf("Error parsing request-JSON: %v", err))
+		return
+	}
+
+	if params.Name == "" || params.Name == " " {
+		responseWithError(w, 403, "Name field cannot be empty")
 		return
 	}
 
@@ -42,19 +42,33 @@ func (apiCfg *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Reques
 	responseWithJSON(w, 201, databaseUserToResponseUser(user)) // now hook this up handler with a router
 }
 
-func (apiCfg *apiConfig) handlerGetUser(w http.ResponseWriter, r *http.Request) {
+func (apiCfg *apiConfig) handlerGetUser(w http.ResponseWriter, r *http.Request, user database.User) {
 	//endpoint which will only work for a logged-in user
-	apiKey, err := auth.GetAPIKey(r.Header)
-	if err != nil{
-		responseWithError(w, 403, fmt.Sprintf("Auth error: %v", err))
-		return 
+	// apiKey, err := auth.GetAPIKey(r.Header)
+	// if err != nil{
+	// 	responseWithError(w, 403, fmt.Sprintf("Auth error: %v", err))
+	// 	return
+	// }
+
+	// user, err := apiCfg.DB.GetUserByAPI(r.Context(), apiKey) //context package which gives way to track something that's happening across mutilple go routine, and we can also cancel the context - which kills http request
+	// if err != nil{
+	// 	responseWithError(w, 400, fmt.Sprintf("Could not get user: %v", err))
+	// 	return
+	// }
+
+	//Note: we're replacing this in middleware, coz its required by multiple functions
+
+	responseWithJSON(w, 200, databaseUserToResponseUser(user))
+}
+
+func (apiCfg *apiConfig) handlerGetPostsForUser(w http.ResponseWriter, r *http.Request, user database.User) {
+	posts, err := apiCfg.DB.GetPostsForUser(r.Context(), database.GetPostsForUserParams{
+		UserID: user.ID,
+		Limit:  10,
+	})
+	if err != nil {
+		responseWithError(w, 400, fmt.Sprintf("couldnot get posts : %v", err))
 	}
 
-	user, err := apiCfg.DB.GetUserByAPI(r.Context(), apiKey) //context package which gives way to track something that's happening across mutilple go routine, and we can also cancel the context - which kills http request
-	if err != nil{
-		responseWithError(w, 400, fmt.Sprintf("Could not get user: %v", err))
-		return
-	}
-	
-	responseWithJSON(w, 200, databaseUserToResponseUser(user))
+	responseWithJSON(w, 200, databasePostsToPosts(posts))
 }
