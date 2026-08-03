@@ -60,6 +60,7 @@ func scrapeFeed(db *database.Queries, wg *sync.WaitGroup, feed database.Feed) {
 		return
 	}
 
+	// Something to note here is that - for each item present in the feed we create a DB entry if its not there previously
 	for _, item := range rssFeed.Channel.Item {
 
 		description := sql.NullString{}

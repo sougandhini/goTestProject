@@ -145,6 +145,8 @@ POST - /feed_follows , pass Auth header with ApiKey and in body pass "feed_id" t
 GET - /feed_follows, pass Auth header 
 DELETE - /feed_follows/{feedFollowID} - pass Auth header and nothing is required in body
 
+4. To check all the newest items is feed: GET /posts
+
 ## WayForward
 1. Improve logging mechanism
 2. Add a frontend/CLI to interact with API

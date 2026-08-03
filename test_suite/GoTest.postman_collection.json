@@ -1,0 +1,290 @@
+{
+  "info": {
+    "_postman_id": "8c1dbc8f-d5ab-44f7-b967-156181ee6175",
+    "name": "GoTest",
+    "description": "Experimenting with chi-server as RSS aggregator.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "21987916"
+  },
+  "item": [
+    {
+      "name": "users",
+      "item": [
+        {
+          "name": "GetUser",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "ApiKey value_of_the_key",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/v1/users",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "v1",
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "CreateUser",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\":\"Please specify a name here\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/v1/users",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "v1",
+                "users"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "This folder contains all the requests regarding users. This inclused:\n\n1. Create User\n    \n2. Get user - this is an authenticated method"
+    },
+    {
+      "name": "Feed",
+      "item": [
+        {
+          "name": "CreateFeed",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "ApiKey value_of_the_key",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": []
+            },
+            "url": {
+              "raw": "http://localhost:8080/v1/feeds",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "v1",
+                "feeds"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetFeeds",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "ApiKey value_of_the_key",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "http://localhost:8080/v1/feeds",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "v1",
+                "feeds"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "This folder contains all the requests wrt feeds. This includes:\n\n1. Create a feed - this is an authenticated method\n    \n2. List all the feeds of all users"
+    },
+    {
+      "name": "FeedFollows",
+      "item": [
+        {
+          "name": "CreateFeedFollow",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "ApiKey value_of_the_key",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"feed_id\":\"id_of_the_feed  fetch it from the reponse of feed-get\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/v1/feed_follows",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "v1",
+                "feed_follows"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetFeedFollows",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "ApiKey value_of_the_key",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "http://localhost:8080/v1/feed_follows",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "v1",
+                "feed_follows"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "UnfollowFeed",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "ApiKey value_of_the_key",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "http://localhost:8080/v1/feed_follows/id_of_the_feedFollow",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "v1",
+                "feed_follows",
+                "id_of_the_feedFollow"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "This folder contains all the requests regarding the feeds that each user follows. Its a n:n relationship table. The requests in this folder are: (all these methods are authenticated\n\n1. Create a feed follow\n    \n2. Get all the feeds followed by a user\n    \n3. Unfollow a feed"
+    },
+    {
+      "name": "getNewPosts",
+      "item": [
+        {
+          "name": "GetAllNewestPosts",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "ApiKey value_of_the_key",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/v1/posts",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "v1",
+                "posts"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "this is the RSS feature... based on the items in DB we will order it and get the lastest posts, thorough sql-join query"
+    }
+  ]
+}
