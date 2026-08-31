@@ -128,6 +128,16 @@ user to be able to get a list of all the newst posts from feeds that they're fol
 1. This involves join query
 2. this is an authenticated end point
 
+## Containersing and management using docker and minikube
+
+Note: Docker - for containerisation and k8s for handling the containers (rolling updates, scaling, networking, restart etc) using minikube (a local kuberenetes dev environment)
+
+1. to build a container, write code in dockerfile, and add some in dockerignore if you wanna ingnore
+2. run the cmd docker build -t name_of_your_container path\Where\Its\Located -> this will build an image
+3. to check images run - docker images
+
+oH hOOOO, solved another problem!
+DB was not accepting connection coz we had defined localhost for dburl in .env file, so we changed it to host.docker coz for docker localhost is the application itself LOL!
 
 
 # Overall:
@@ -146,8 +156,19 @@ GET - /feed_follows, pass Auth header
 DELETE - /feed_follows/{feedFollowID} - pass Auth header and nothing is required in body
 
 4. To check all the newest items is feed: GET /posts
+Encountered beautiful first problem wrt installation, docker wasn't running coz "virtualisation was not enabled", so this problem was solved through:
+a. check taskmgr -> performace -> cpu virtualisation
+b. open optional resources through windows RUN, and turn on windows hypervisor, virtual machine platform and sub-system for linux
+
+
 
 ## WayForward
 1. Improve logging mechanism
 2. Add a frontend/CLI to interact with API
 3. this was just happy coding... so dont mind to go deep and rouge XD 
+
+
+
+#### Few Things:
+to run in local host and not docker: postgres://postgres:pwd@localhost:5432/rssagg?sslmode=disable
+to run in docker change the variable to: DB_URL=postgres://username:password@host.docker.internal:5432/database_name
